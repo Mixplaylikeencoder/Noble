@@ -1,88 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>License Key Generator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f4f4f9;
-        }
-        .container {
-            text-align: center;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
-        input {
-            padding: 10px;
-            margin: 10px;
-            width: 200px;
-            font-size: 16px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        p {
-            font-size: 18px;
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Генерация ключей</title>
 </head>
 <body>
-    <div class="container">
-        <h1>License Key Generator</h1>
-        <p>Enter your UUID to generate a license key.</p>
-        <input type="text" id="uuid" placeholder="Enter your UUID">
-        <button onclick="generateLicenseKey()">Generate License Key</button>
-        <p id="result"></p>
-    </div>
-
-    <script>
-        async function generateLicenseKey() {
-            const uuid = document.getElementById('uuid').value;
-            const resultElement = document.getElementById('result');
-
-            if (!uuid) {
-                resultElement.textContent = 'Please enter your UUID.';
-                return;
-            }
-
-            const timestamp = Date.now();
-            const expirationTime = timestamp + 24 * 60 * 60 * 1000;
-            const key = `${uuid}-${expirationTime}-${Math.random().toString(36).substring(2, 15)}`;
-
-            const response = await fetch('https://twilight-feather-9b13.ttikitiki29.workers.dev', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ uuid, licenseKey: key }),
-            });
-
-            const data = await response.json();
-            if (data.status === 'saved') {
-                resultElement.textContent = `Generated License Key: ${key}`;
-            } else {
-                resultElement.textContent = 'Failed to generate or save key.';
-            }
+  <h1>Генерация ключа</h1>
+  <button id="generateBtn">Сгенерировать ключ</button>
+  <pre id="result"></pre>
+  <script>
+    function generateKey(length) {
+      let result = '';
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+      }
+      return result;
+    }
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          const r = Math.random() * 16 | 0;
+          const v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+      });
+    }
+    document.getElementById('generateBtn').addEventListener('click', async () => {
+      const key = generateKey(16);
+      const uuid = generateUUID();
+      document.getElementById('result').innerText = 'Ключ: ' + key + '\nUUID: ' + uuid;
+      try {
+        const response = await fetch('https://twilight-feather-9b13.ttikitiki29.workers.dev/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer secret123'
+          },
+          body: JSON.stringify({ key, uuid })
+        });
+        const data = await response.json();
+        if(data.success) {
+          alert('Ключ успешно сохранён!');
+        } else {
+          alert('Ошибка при сохранении ключа.');
         }
-    </script>
+      } catch (err) {
+        console.error(err);
+        alert('Ошибка при отправке данных на сервер.');
+      }
+    });
+  </script>
 </body>
 </html>
