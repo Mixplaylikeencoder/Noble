@@ -1,53 +1,34 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Генерация ключей</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key Generator</title>
 </head>
 <body>
-  <h1>Генерация ключа</h1>
-  <button id="generateBtn">Сгенерировать ключ</button>
-  <pre id="result"></pre>
-  <script>
-    function generateKey(length) {
-      let result = '';
-      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
-      }
-      return result;
-    }
-    function generateUUID() {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-          const r = Math.random() * 16 | 0;
-          const v = c === 'x' ? r : (r & 0x3 | 0x8);
-          return v.toString(16);
-      });
-    }
-    document.getElementById('generateBtn').addEventListener('click', async () => {
-      const key = generateKey(16);
-      const uuid = generateUUID();
-      document.getElementById('result').innerText = 'Ключ: ' + key + '\nUUID: ' + uuid;
-      try {
-        const response = await fetch('https://twilight-feather-9b13.ttikitiki29.workers.dev/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer secret123'
-          },
-          body: JSON.stringify({ key, uuid })
-        });
-        const data = await response.json();
-        if(data.success) {
-          alert('Ключ успешно сохранён!');
-        } else {
-          alert('Ошибка при сохранении ключа.');
+    <h1>Key Generator</h1>
+    <button onclick="generateKey()">Generate Key</button>
+    <p id="generatedKey"></p>
+
+    <script>
+        async function generateKey() {
+            const uuid = crypto.randomUUID();
+            document.getElementById('generatedKey').innerText = uuid;
+
+            const response = await fetch('https://your-worker-url.com/store', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ key: uuid, uuid: uuid }),
+            });
+
+            if (response.ok) {
+                alert('Key stored successfully!');
+            } else {
+                alert('Error storing the key!');
+            }
         }
-      } catch (err) {
-        console.error(err);
-        alert('Ошибка при отправке данных на сервер.');
-      }
-    });
-  </script>
+    </script>
 </body>
 </html>
